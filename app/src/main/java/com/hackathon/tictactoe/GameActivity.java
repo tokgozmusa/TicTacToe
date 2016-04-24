@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -42,6 +43,10 @@ public class GameActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
+
+        final MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.win);
+
+
         textView = (TextView) findViewById(R.id.textView_turn);
 
         gridView = (GridView) findViewById(R.id.gridView);
@@ -74,6 +79,7 @@ public class GameActivity extends Activity
                 //you won
                 if(result == 1)
                 {
+                    mp.start();
                     textView.setTextColor(Color.parseColor("#B5007B"));
                     textView.setText("Game Over, You WON!");
                     isGameOver = true;
