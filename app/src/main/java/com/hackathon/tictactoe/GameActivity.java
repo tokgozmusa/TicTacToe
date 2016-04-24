@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,6 +30,8 @@ public class GameActivity extends Activity
     TextView textView;
 
     boolean isGameOver = false;
+
+    int turn_counter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -58,7 +61,9 @@ public class GameActivity extends Activity
                 if(isGameOver)
                     return;
 
+                textView.setTextColor(Color.RED);
                 textView.setText("Computer Turn");
+
 
                 array[position] = 1;
                 ImageView tmp = (ImageView) gridView.getItemAtPosition(position);
@@ -69,11 +74,13 @@ public class GameActivity extends Activity
                 //you won
                 if(result == 1)
                 {
+                    textView.setTextColor(Color.parseColor("#B5007B"));
                     textView.setText("Game Over, You WON!");
                     isGameOver = true;
                 }
                 else if(result == 2) //draw
                 {
+                    textView.setTextColor(Color.parseColor("#B5007B"));
                     textView.setText("Game Over, Draw!");
                     isGameOver = true;
                 }
@@ -110,11 +117,13 @@ public class GameActivity extends Activity
                                 //computer won
                                 if(result == 1)
                                 {
+                                    textView.setTextColor(Color.parseColor("#B5007B"));
                                     textView.setText("Game Over, Computer WON!");
                                     isGameOver = true;
                                 }
                                 else if(result == 2) //draw
                                 {
+                                    textView.setTextColor(Color.parseColor("#B5007B"));
                                     textView.setText("Game Over, Draw!");
                                     isGameOver = true;
                                 }
@@ -129,26 +138,148 @@ public class GameActivity extends Activity
             }
         });
 
+
+        Button restartButton = (Button) findViewById(R.id.button_restart);
+        restartButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                array = new int[9];
+                isGameOver = false;
+                turn_counter = 0;
+
+                textView.setTextColor(Color.BLUE);
+                textView.setText("Your Turn");
+
+                for(int i=0;i<9;i++)
+                {
+                    ImageView tmp = (ImageView) gridView.getItemAtPosition(i);
+                    tmp.setImageResource(R.drawable.blank_square);
+                }
+
+            }
+        });
+
+
+
     }
 
 
     //AI of the game
     public void computerMove()
     {
-        Random random = new Random();
+        turn_counter++;
 
-        int computer_index = random.nextInt(9);
+        boolean flag = false;
 
-        while(!(array[computer_index] == 0))
-            computer_index = random.nextInt(9);
+        if(turn_counter >= 3)
+        {
 
+            //check that can computer win
+            for(int i=0;i<9;i++)
+            {
+                if(array[i] == 0)
+                {
+                    array[i] = 2;
+                    if(checkAI())
+                    {
+                        ImageView tmp = (ImageView) gridView.getItemAtPosition(i);
+                        tmp.setImageResource(R.drawable.o_icon);
+                        flag = true;
+                        break;
+                    }
+                    else
+                        array[i] = 0;
+                }
+            }
+        }
+
+
+        if(!flag)
+        {
+            //check that can person win
+            for(int i=0;i<9;i++)
+            {
+                if(array[i] == 0)
+                {
+                    array[i] = 1;
+                    if(checkAI())
+                    {
+                        array[i] = 2;
+                        ImageView tmp = (ImageView) gridView.getItemAtPosition(i);
+                        tmp.setImageResource(R.drawable.o_icon);
+                        flag = true;
+                        break;
+                    }
+                    else
+                        array[i] = 0;
+                }
+            }
+        }
+
+
+        if(!flag)
+        {
+            Random random = new Random();
+
+            int computer_index = random.nextInt(9);
+
+            while(!(array[computer_index] == 0))
+                computer_index = random.nextInt(9);
+
+            array[computer_index] = 2;
+            ImageView tmp = (ImageView) gridView.getItemAtPosition(computer_index);
+            tmp.setImageResource(R.drawable.o_icon);
+        }
+
+        textView.setTextColor(Color.BLUE);
         textView.setText("Your Turn");
 
-        array[computer_index] = 2;
-
-        ImageView tmp = (ImageView) gridView.getItemAtPosition(computer_index);
-        tmp.setImageResource(R.drawable.o_icon);
     }
+
+
+
+    public boolean checkAI()
+    {
+        //check horizontal
+        if(areSame(0, 1, 2))
+            return true;
+
+        if(areSame(3, 4, 5))
+            return true;
+
+        if(areSame(6, 7, 8))
+            return true;
+
+
+
+        //check vertical
+        if(areSame(0, 3, 6))
+            return true;
+
+        if(areSame(1, 4, 7))
+            return true;
+
+        if(areSame(2, 5, 8))
+            return true;
+
+
+
+        //check diagonal from right to left
+        if(areSame(2, 4, 6))
+            return true;
+
+
+
+        //check diagonal from left to right
+        if(areSame(0, 4, 8))
+            return true;
+
+
+        return false;
+    }
+
 
 
     public boolean areSame(int index1, int index2, int index3)
